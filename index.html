@@ -1,0 +1,62 @@
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+  <meta charset="UTF-8">  
+  <title>Invoice Scanner</title>  
+  <style>  
+    body { font-family: sans-serif; max-width: 600px; margin: 3em auto; }  
+    pre { background: #f4f4f4; padding: 1em; }  
+  </style>  
+</head>  
+<body>  
+  <h2>Invoice Scanner</h2>  
+  <input type="file" id="fileInput" accept="image/*,application/pdf" />  
+  <button id="analyzeBtn">Analyze Invoice</button>  
+  <div id="error" style="color: red; margin-top: 10px;"></div>  
+  <pre id="result" style="margin-top: 20px;"></pre>  
+  
+  <script>  
+    const fileInput = document.getElementById('fileInput');  
+    const analyzeBtn = document.getElementById('analyzeBtn');  
+    const errorDiv = document.getElementById('error');  
+    const resultPre = document.getElementById('result');  
+  
+    analyzeBtn.addEventListener('click', async () => {  
+      errorDiv.textContent = '';  
+      resultPre.textContent = '';  
+  
+      const file = fileInput.files[0];  
+      if (!file) {  
+        errorDiv.textContent = 'Please select a file first.';  
+        return;  
+      }  
+  
+      const formData = new FormData();  
+      formData.append('file', file);  
+  
+      analyzeBtn.disabled = true;  
+      analyzeBtn.textContent = 'Analyzing...';  
+  
+      try {  
+        const res = await fetch('/api/invoice-scanner', {  
+          method: 'POST',  
+          body: formData  
+        });  
+  
+        if (!res.ok) {  
+          const errText = await res.text();  
+          throw new Error(errText || 'Error analyzing invoice');  
+        }  
+  
+        const data = await res.json();  
+        resultPre.textContent = JSON.stringify(data, null, 2);  
+      } catch (err) {  
+        errorDiv.textContent = err.message || 'Error analyzing invoice';  
+      } finally {  
+        analyzeBtn.disabled = false;  
+        analyzeBtn.textContent = 'Analyze Invoice';  
+      }  
+    });  
+  </script>  
+</body>  
+</html>  
