@@ -34,18 +34,25 @@ module.exports = async function (context, req) {
   
     // Validate supported MIME types for Document Intelligence  
     const supportedTypes = [  
-      "application/pdf",  
-      "image/jpeg",  
-      "image/png",  
-      "image/tiff",  
-      "image/bmp",  
-      "image/heif",  
-      "image/heic"  
+    "application/pdf",  
+    "application/octet-stream", // Accept as fallback for PDFs  
+    "image/jpeg",  
+    "image/png",  
+    "image/tiff",  
+    "image/bmp",  
+    "image/heif",  
+    "image/heic"  
     ];  
-    if (!supportedTypes.includes(mimeType)) {  
-      context.res = { status: 415, body: "Unsupported file type: ${mimeType}" };  
-      return;  
+    
+    // Accept octet-stream if the file extension is .pdf  
+    const isPdf = mimeType === "application/pdf" ||  
+    (mimeType === "application/octet-stream" && req.headers["x-file-name"] && req.headers["x-file-name"].toLowerCase().endsWith(".pdf"));  
+    
+    if (!supportedTypes.includes(mimeType) && !isPdf) {  
+    context.res = { status: 415, body: `Unsupported file type: ${mimeType}` };  
+    return;  
     }  
+
   
     const buffer = Buffer.concat(fileBuffer);  
   
