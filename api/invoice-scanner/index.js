@@ -43,7 +43,7 @@ module.exports = async function (context, req) {
       "image/heic"  
     ];  
     if (!supportedTypes.includes(mimeType)) {  
-      context.res = { status: 415, body: "Unsupported file type" };  
+      context.res = { status: 415, body: "Unsupported file type: ${mimeType}" };  
       return;  
     }  
   
