@@ -14,7 +14,7 @@ module.exports = async function (context, req) {
   
   try {  
     await new Promise((resolve, reject) => {  
-      const busboy = new Busboy({ headers: req.headers });  
+      const busboy = Busboy({ headers: req.headers });  
       busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {  
         fileFound = true;  
         mimeType = mimetype;  
