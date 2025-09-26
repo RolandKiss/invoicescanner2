@@ -86,7 +86,9 @@ module.exports = async function (context, req) {
   
     // Prepare Document Intelligence Analyze API URL  
     const apiUrl = `${endpoint}/formrecognizer/documentModels/prebuilt-invoice:analyze?api-version=2023-07-31`;  
-  
+    
+    console.log('fileBuffer.length:', fileBuffer.length);  
+    console.log('First 20 bytes:', fileBuffer.slice(0, 20).toString('hex'));  
     // POST the raw file buffer with the correct Content-Type  
     const analyzeRes = await fetch(apiUrl, {  
       method: "POST",  
