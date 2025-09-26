@@ -1,7 +1,5 @@
-// api/invoice-scanner/index.js  
-  
 const Busboy = require("busboy");  
-const fetch = require("node-fetch"); // If on Node 18+, you can use global fetch  
+const fetch = require("node-fetch"); // For Node <18; otherwise use global fetch  
   
 const POLL_INTERVAL_MS = 2000;  
 const MAX_POLL_TRIES = 15;  
@@ -31,26 +29,46 @@ module.exports = async function (context, req) {
     return;  
   }  
   
-  let fileBuffer = [];  
-  let mimeType = "";  
-  let fileFound = false;  
+  let fileBuffer, mimeType, fileFound = false;  
   
   try {  
-    // Parse the multipart form-data using Busboy  
-    await new Promise((resolve, reject) => {  
-      const busboy = Busboy({ headers: req.headers });  
-      busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {  
-        fileFound = true;  
-        mimeType = mimetype;  
-        file.on("data", (data) => fileBuffer.push(data));  
-      });  
-      busboy.on("finish", resolve);  
-      busboy.on("error", reject);  
-      busboy.end(req.rawBody || req.body);  
-    });  
+    // Check Content-Type  
+    const contentType = req.headers['content-type'] || '';  
   
-    if (!fileFound) {  
-      context.res = { status: 400, body: "No file uploaded" };  
+    if (contentType.startsWith('multipart/form-data')) {  
+      // Use Busboy for multipart uploads (your old logic)  
+      let parts = [];  
+      await new Promise((resolve, reject) => {  
+        const busboy = Busboy({ headers: req.headers });  
+        busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {  
+          fileFound = true;  
+          mimeType = mimetype;  
+          file.on("data", (data) => parts.push(data));  
+        });  
+        busboy.on("finish", resolve);  
+        busboy.on("error", reject);  
+        busboy.end(req.rawBody || req.body);  
+      });  
+  
+      if (!fileFound) {  
+        context.res = { status: 400, body: "No file uploaded" };  
+        return;  
+      }  
+      fileBuffer = Buffer.concat(parts);  
+  
+    } else if (  
+      // Accept raw uploads of supported types  
+      SUPPORTED_TYPES.some(type => contentType.startsWith(type))  
+    ) {  
+      fileBuffer = Buffer.isBuffer(req.body)  
+        ? req.body  
+        : Buffer.from(req.body);  
+  
+      mimeType = contentType;  
+      fileFound = true;  
+  
+    } else {  
+      context.res = { status: 415, body: `Unsupported content type: ${contentType}` };  
       return;  
     }  
   
@@ -66,8 +84,6 @@ module.exports = async function (context, req) {
       return;  
     }  
   
-    const buffer = Buffer.concat(fileBuffer);  
-  
     // Prepare Document Intelligence Analyze API URL  
     const apiUrl = `${endpoint}/formrecognizer/documentModels/prebuilt-invoice:analyze?api-version=2023-07-31`;  
   
@@ -78,7 +94,7 @@ module.exports = async function (context, req) {
         "Content-Type": mimeType,  
         "Ocp-Apim-Subscription-Key": apiKey  
       },  
-      body: buffer  
+      body: fileBuffer  
     });  
   
     if (!analyzeRes.ok) {  
