@@ -24,7 +24,7 @@ module.exports = async function (context, req) {
       });  
       busboy.on("finish", resolve);  
       busboy.on("error", reject);  
-      busboy.end(req.rawBody);  
+      busboy.end(req.rawBody || req.body);  
     });  
   
     if (!fileFound) {  
