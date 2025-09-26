@@ -60,10 +60,20 @@ module.exports = async function (context, req) {
       // Accept raw uploads of supported types  
       SUPPORTED_TYPES.some(type => contentType.startsWith(type))  
     ) {  
-      fileBuffer = Buffer.isBuffer(req.body)  
-        ? req.body  
-        : Buffer.from(req.body);  
-  
+        if (Buffer.isBuffer(req.body)) {  
+        fileBuffer = req.body;  
+        } else if (typeof req.body === 'string') {  
+        // Is it base64? If so, decode!  
+        if (/^[A-Za-z0-9+/=]+$/.test(req.body.trim())) {  
+            fileBuffer = Buffer.from(req.body, 'base64');  
+        } else {  
+            // This is probably a bug - warn or throw  
+            throw new Error('req.body is a string, but not base64. Uploads may be broken.');  
+        }  
+        } else {  
+        throw new Error('req.body is not a Buffer or string');  
+        }  
+        
       mimeType = contentType;  
       fileFound = true;  
   
