@@ -40,7 +40,14 @@
         // No headers here!  
         const res = await fetch('/api/invoice-scanner', {  
           method: 'POST',  
+<<<<<<< HEAD
           body: formData  
+=======
+          headers: {  
+            'Content-Type': 'application/pdf',  
+          },  
+          body: file  
+>>>>>>> parent of 793eb2d (rollback to earlier version)
         });  
   
         if (!res.ok) {  
