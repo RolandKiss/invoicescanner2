@@ -36,11 +36,11 @@
       try {  
         const res = await fetch('/api/invoice-scanner', {  
           method: 'POST',  
-          headers: {  
-            'Content-Type': file.type || 'application/octet-stream',  
-            'x-file-name': file.name  // so your backend can check for .pdf extensions if needed  
-          },  
-          body: file  
+          // headers: {  
+          //   'Content-Type': file.type || 'application/octet-stream',  
+          //   'x-file-name': file.name  // so your backend can check for .pdf extensions if needed  
+          // },  
+          body: FormData  
         });  
         
         if (!res.ok) {  
