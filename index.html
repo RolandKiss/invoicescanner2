@@ -24,7 +24,7 @@
     analyzeBtn.addEventListener('click', async () => {  
       errorDiv.textContent = '';  
       resultPre.textContent = '';  
-      
+  
       const file = fileInput.files[0];  
       if (!file) {  
         errorDiv.textContent = 'Please select a file first.';  
@@ -32,22 +32,22 @@
       }  
       analyzeBtn.disabled = true;  
       analyzeBtn.textContent = 'Analyzing...';  
-      
+  
       try {  
         const formData = new FormData();  
         formData.append('file', file, file.name);  
-      
-        // NO headers set here  
+  
+        // No headers here!  
         const res = await fetch('/api/invoice-scanner', {  
           method: 'POST',  
           body: formData  
         });  
-      
+  
         if (!res.ok) {  
           const errText = await res.text();  
           throw new Error(errText || 'Error analyzing invoice');  
         }  
-      
+  
         const data = await res.json();  
         resultPre.textContent = JSON.stringify(data, null, 2);  
       } catch (err) {  
