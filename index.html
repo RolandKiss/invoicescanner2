@@ -32,29 +32,22 @@
       }  
       analyzeBtn.disabled = true;  
       analyzeBtn.textContent = 'Analyzing...';  
-  
+        
       try {  
-        const formData = new FormData();  
-        formData.append('file', file, file.name);  
-  
-        // No headers here!  
         const res = await fetch('/api/invoice-scanner', {  
           method: 'POST',  
-<<<<<<< HEAD
-          body: formData  
-=======
           headers: {  
-            'Content-Type': 'application/pdf',  
+            'Content-Type': file.type || 'application/octet-stream',  
+            'x-file-name': file.name  // so your backend can check for .pdf extensions if needed  
           },  
           body: file  
->>>>>>> parent of 793eb2d (rollback to earlier version)
         });  
-  
+        
         if (!res.ok) {  
           const errText = await res.text();  
           throw new Error(errText || 'Error analyzing invoice');  
         }  
-  
+        
         const data = await res.json();  
         resultPre.textContent = JSON.stringify(data, null, 2);  
       } catch (err) {  
@@ -62,7 +55,7 @@
       } finally {  
         analyzeBtn.disabled = false;  
         analyzeBtn.textContent = 'Analyze Invoice';  
-      }  
+      }    
     });  
   </script>  
 </body>  
