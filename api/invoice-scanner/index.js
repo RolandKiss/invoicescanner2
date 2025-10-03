@@ -11,7 +11,8 @@ const SUPPORTED_TYPES = [
   "image/tiff",  
   "image/bmp",  
   "image/heif",  
-  "image/heic"  
+  "image/heic",
+  "multipart/form-data"  
 ];  
   
 module.exports = async function (context, req) {  
