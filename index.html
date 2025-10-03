@@ -21,42 +21,42 @@
     const errorDiv = document.getElementById('error');  
     const resultPre = document.getElementById('result');  
   
-  analyzeBtn.addEventListener('click', async () => {  
-    errorDiv.textContent = '';  
-    resultPre.textContent = '';  
-    
-    const file = fileInput.files[0];  
-    if (!file) {  
-      errorDiv.textContent = 'Please select a file first.';  
-      return;  
-    }  
-    analyzeBtn.disabled = true;  
-    analyzeBtn.textContent = 'Analyzing...';  
-    
-    try {  
-      const formData = new FormData();  
-      formData.append('file', file, file.name);  
-    
-      const res = await fetch('/api/invoice-scanner', {  
-        method: 'POST',  
-        body: formData  
-        // No Content-Type header here  
-      });  
-    
-      if (!res.ok) {  
-        const errText = await res.text();  
-        throw new Error(errText || 'Error analyzing invoice');  
+    analyzeBtn.addEventListener('click', async () => {  
+      errorDiv.textContent = '';  
+      resultPre.textContent = '';  
+      
+      const file = fileInput.files[0];  
+      if (!file) {  
+        errorDiv.textContent = 'Please select a file first.';  
+        return;  
       }  
-    
-      const data = await res.json();  
-      resultPre.textContent = JSON.stringify(data, null, 2);  
-    } catch (err) {  
-      errorDiv.textContent = err.message || 'Error analyzing invoice';  
-    } finally {  
-      analyzeBtn.disabled = false;  
-      analyzeBtn.textContent = 'Analyze Invoice';  
-    }  
-  });   
+      analyzeBtn.disabled = true;  
+      analyzeBtn.textContent = 'Analyzing...';  
+      
+      try {  
+        const formData = new FormData();  
+        formData.append('file', file, file.name);  
+      
+        // NO headers set here  
+        const res = await fetch('/api/invoice-scanner', {  
+          method: 'POST',  
+          body: formData  
+        });  
+      
+        if (!res.ok) {  
+          const errText = await res.text();  
+          throw new Error(errText || 'Error analyzing invoice');  
+        }  
+      
+        const data = await res.json();  
+        resultPre.textContent = JSON.stringify(data, null, 2);  
+      } catch (err) {  
+        errorDiv.textContent = err.message || 'Error analyzing invoice';  
+      } finally {  
+        analyzeBtn.disabled = false;  
+        analyzeBtn.textContent = 'Analyze Invoice';  
+      }  
+    });  
   </script>  
 </body>  
 </html>  
